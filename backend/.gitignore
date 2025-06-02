@@ -1,0 +1,6 @@
+# Python 仮想環境
+.venv/
+
+# キャッシュフォルダ
+cache/
+__pycache__/
