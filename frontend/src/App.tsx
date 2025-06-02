@@ -1,15 +1,19 @@
 import React from 'react';
-import Home from './pages/Home'
-import MapView from './components/MapView';
+import Header from './components/Header';
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
+import routes from './router/index';
+
+const AppRoutes = () => {
+  return useRoutes(routes);
+};
 
 const App: React.FC = () => {
   return (
-    <div>
-      <h1>地図アプリ</h1>
-      <Home/>
-      <MapView />
-    </div>
-  );
-};
+    <Router>
+      <Header />
+      <AppRoutes />
+    </Router>
+  )
+}
 
 export default App;
