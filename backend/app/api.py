@@ -1,25 +1,28 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from .graph_builder import get_walk_graph, get_origin_node
 from .score_builder import build_node_score_map
 from .route_finder import find_loop
 from .tag_presets import preset_map
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
 @app.route('/generate-route', methods=['POST'])
 def generate_route():
+    print("ルート生成リクエストを受信しました")
     data = request.json
     lat = data.get('lat', 36.6431)
     lon = data.get('lon', 138.1887)
-    distance_km = data.get('distance_km', 3.0)
+    distance_km = float(data.get('distance', 3.0))
     lambda_score = data.get('lambda_score', 0.0)
-    theme = data.get('theme', 'default')
-
+    theme = data.get('theme', [])
+    print(f"Received data: lat={lat}, lon={lon}, distance={distance_km}, lambda_score={lambda_score}, theme={theme}")
     graph_dist = distance_km * 500
     G = get_walk_graph(lat, lon, graph_dist)
     orig_node = get_origin_node(G, lat, lon)
 
-    tag_score_list = preset_map.get(theme)
+    tag_score_list = preset_map.get(theme[0])
     node_score = build_node_score_map(G, (lat, lon), tag_score_list, dist=graph_dist)
 
     print("ルート生成中...")
