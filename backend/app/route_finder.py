@@ -23,9 +23,8 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
     custom_weight = custom_weight_builder(node_score, lambda_score)
     best_path = None
     best_diff = float('inf')
-    nodes = filter_far_nodes(G, orig_node, min_distance_m=400)
+    nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 50)
     for _ in range(10):
-        nodes = filter_far_nodes(G, orig_node, min_distance_m=400)
         mid_nodes = [node for node in random.sample(nodes, N)]
 
         try:
@@ -42,7 +41,8 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
             if diff < best_diff:
                 best_path = path
                 best_diff = diff
-                best_mid_nodes = mid_nodes
+                best_km = total_km
+                best_mid_nodes = mid_nodes            
         except:
             continue
-    return best_path, best_diff, best_mid_nodes
+    return best_path, total_km, best_mid_nodes
