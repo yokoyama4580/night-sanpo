@@ -2,6 +2,9 @@ import osmnx as ox
 
 def build_node_score_map(G, center_point, tag_score_list, dist=2000):
     node_score = {}
+    if not tag_score_list:
+        print("タグスコアリストが空です。")
+        return node_score
     for tags, score in tag_score_list:
         try:
             gdf = ox.features.features_from_point(center_point, tags=tags, dist=dist)

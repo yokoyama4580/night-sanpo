@@ -23,6 +23,7 @@ comfortable_route = [
 ]
 
 preset_map = {
+    "default":[],
     "safety": safe_route,
     "scenic": scenic_route,
     "comfort": comfortable_route,
