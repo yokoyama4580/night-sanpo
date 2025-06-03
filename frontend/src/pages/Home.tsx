@@ -1,17 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Stack, Paper, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_API_BASE
+
 const Home: React.FC = () => {
     const [steps, setSteps] = useState('');
-    const [selected, setSelected] = useState<string | null>(null);
+    // ★テーマは複数選択可能な配列に
+    const [selected, setSelected] = useState<string[]>([]);
+    const [lat, setLat] = useState<number | null>(null);
+    const [lon, setLon] = useState<number | null>(null);
+    const [geoError, setGeoError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const handleSelect = (type: string) => setSelected(type);
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            setGeoError('位置情報の取得がサポートされていません');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                setLat(pos.coords.latitude);
+                setLon(pos.coords.longitude);
+            },
+            err => {
+                setGeoError('位置情報の取得に失敗しました: ' + err.message);
+            }
+        );
+    }, []);
 
-    const handleClick = () => {
-        // 情報をバックエンドに送る（距離、カテゴリ）
-        navigate("/map");
+    // ★トグル式で追加/削除
+    const handleSelect = (type: string) => {
+        setSelected(prev =>
+            prev.includes(type)
+                ? prev.filter(t => t !== type)
+                : [...prev, type]
+        );
+    };
+
+    const handleClick = async () => {
+        if (lat === null || lon === null) {
+            setGeoError('現在地の取得が完了するまでお待ちください');
+            return;
+        }
+        console.log("lat, lon, dist, score, theme");
+        console.log(lat, lon, steps, 0,3, selected);
+
+        const response = await fetch(`${API_BASE}/generate-route`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                lat: lat,
+                lon: lon,
+                distance: steps,
+                lambda_score: 0.3,
+                theme: selected,
+            }),
+        });
+
+        const data = await response.json();
+        navigate("/map", {
+            state: { routeData: data }
+        });
     };
 
     return (
@@ -22,7 +74,7 @@ const Home: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: '#f5f6fa', // 任意で背景色を薄く
+                bgcolor: '#f5f6fa',
             }}
         >
             <Paper
@@ -52,10 +104,11 @@ const Home: React.FC = () => {
                     inputProps={{ min: 0 }}
                 />
                 <Stack direction="row" spacing={2}>
-                    {['安全', '景色', '快適'].map(type => (
+                    {['safety', 'scenic', 'comfort'].map(type => (
                         <Button
                             key={type}
-                            variant={selected === type ? 'contained' : 'outlined'}
+                            // ★配列に含まれているかで「選択中」判定
+                            variant={selected.includes(type) ? 'contained' : 'outlined'}
                             color="primary"
                             onClick={() => handleSelect(type)}
                             sx={{ width: 100, fontWeight: 'bold' }}
@@ -75,9 +128,14 @@ const Home: React.FC = () => {
                         fontSize: 20,
                         px: 5,
                     }}
+                    disabled={lat === null || lon === null}
                 >
                     ルート生成
                 </Button>
+                {/* 現在地取得エラー表示 */}
+                {geoError && (
+                    <Typography color="error" variant="body2">{geoError}</Typography>
+                )}
             </Paper>
         </Box>
     );
