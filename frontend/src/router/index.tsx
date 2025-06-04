@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 import Home from "../pages/Home";
-import MapView from "../components/MapView";
+import MapView from "../pages/MapView";
 
 const routes: RouteObject[] = [
     {

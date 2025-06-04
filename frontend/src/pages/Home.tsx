@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_API_BASE
 
 const Home: React.FC = () => {
-    const [steps, setSteps] = useState('');
+    const [dist, setDist] = useState('');
     // ★テーマは複数選択可能な配列に
     const [selected, setSelected] = useState<string[]>([]);
     const [lat, setLat] = useState<number | null>(null);
@@ -44,7 +44,7 @@ const Home: React.FC = () => {
             return;
         }
         console.log("lat, lon, dist, score, theme");
-        console.log(lat, lon, steps, 0,3, selected);
+        console.log(lat, lon, dist, 0,3, selected);
 
         const response = await fetch(`${API_BASE}/generate-route`, {
             method: 'POST',
@@ -98,8 +98,8 @@ const Home: React.FC = () => {
                 <TextField
                     label="歩く距離（km）"
                     type="number"
-                    value={steps}
-                    onChange={e => setSteps(e.target.value)}
+                    value={dist}
+                    onChange={e => setDist(e.target.value)}
                     sx={{ width: 250 }}
                     inputProps={{ min: 0 }}
                 />
