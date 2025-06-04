@@ -55,7 +55,7 @@ const Home: React.FC = () => {
                 lat: lat,
                 lon: lon,
                 distance: steps,
-                lambda_score: 0.3,
+                lambda_score: 0.1,
                 theme: selected,
             }),
         });
