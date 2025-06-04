@@ -1,37 +1,25 @@
-import { AppBar, Toolbar, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const HEADER_HEIGHT = 84;
+const HEADER_HEIGHT = 84; // px
 
 const Header: React.FC = () => (
-    <AppBar position="fixed" elevation={3}>
-        <Toolbar
-        sx={{
-            minHeight: HEADER_HEIGHT,
-            height: HEADER_HEIGHT,
-            pl: 3,
-        }}
-        >
-        <Typography
-            variant="h4"
-            component={RouterLink}
-            to="/"
-            sx={{
-                textDecoration: 'none',
-                color: 'common.white',
-                transition: 'opacity 0.2s',
-                '&:hover': {
-                    opacity: 0.7,
-                    textDecoration: 'none',
-                },
-                '&:visited': { color: 'common.white' },
-                cursor: 'pointer',
-            }}
-        >
-            よるさんぽナビ
-        </Typography>
-        </Toolbar>
-    </AppBar>
+  <header
+    className="fixed top-0 left-0 w-full bg-green-600 shadow-lg z-50"
+    style={{ height: HEADER_HEIGHT }}
+  >
+    <div
+      className="flex items-center"
+      style={{ minHeight: HEADER_HEIGHT, height: HEADER_HEIGHT, paddingLeft: '24px' }}
+    >
+      <Link
+        to="/"
+        className="text-3xl font-bold text-white no-underline transition-opacity duration-200 hover:opacity-80 cursor-pointer"
+        style={{ lineHeight: 1 }}
+      >
+        よるさんぽナビ
+      </Link>
+    </div>
+  </header>
 );
 
 export default Header;
