@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ThemeSelector from '../components/Home/ThemeSelector';
 import type { ThemeType } from '../components/Home/ThemeButton';
+import LoadingScreen from '../components/Common/LoadingScreen';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -43,6 +44,7 @@ const Home: React.FC = () => {
     const [lat, setLat] = useState<number | null>(null);
     const [lon, setLon] = useState<number | null>(null);
     const [geoError, setGeoError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -74,23 +76,33 @@ const Home: React.FC = () => {
             setGeoError('現在地の取得が完了するまでお待ちください');
             return;
         }
-        const response = await fetch(`${API_BASE}/generate-route`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                lat: lat,
-                lon: lon,
-                distance: dist,
-                lambda_score: 0.1,
-                theme: selected,
-            }),
-        });
-        const data = await response.json();
-        navigate("/map", {
-            state: { routeData: data }
-        });
+        setIsLoading(true);  // ←追加（API開始時）
+        try {
+            const response = await fetch(`${API_BASE}/generate-route`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    lat: lat,
+                    lon: lon,
+                    distance: dist,
+                    lambda_score: 0.1,
+                    theme: selected,
+                }),
+            });
+            const data = await response.json();
+            navigate("/map", {
+                state: { routeData: data }
+            });
+        } finally {
+            setIsLoading(false); // MapView遷移でほぼ無効だが、失敗時にHome復帰したときのため
+        }
+    };
+
+    // 追加：ローディング画面の表示
+    if (isLoading) {
+        return <LoadingScreen />;
     };
 
     return (
