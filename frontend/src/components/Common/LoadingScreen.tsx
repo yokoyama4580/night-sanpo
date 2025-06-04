@@ -40,8 +40,8 @@ const LoadingScreen: React.FC<{ onCancel?: () => void }> = ({ onCancel }) => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-green-900 text-white">
-            <div className="w-full max-w-sm bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center">
+        <div className="flex flex-col items-center justify-center w-screen h-screen min-h-screen bg-gradient-to-br from-slate-900 to-green-900 text-white">
+            <div className="w-full max-w-sm bg-white/90 rounded-3xl shadow-2xl p-8 flex flex-col items-center mx-auto">
                 <NightWalkIllustration />
                 <Spinner />
                 <h2 className="text-2xl font-extrabold text-green-700 mb-2 drop-shadow">散歩ルートを作成中…</h2>
