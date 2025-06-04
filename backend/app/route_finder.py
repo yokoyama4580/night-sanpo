@@ -3,6 +3,10 @@ import random
 from geopy.distance import geodesic
 from itertools import combinations
 import math
+from shapely.geometry import Polygon
+from pyproj import Geod
+
+geod = Geod(ellps="WGS84")  
 
 def custom_weight_builder(node_score, lambda_score):
     def custom_weight(u, v, data):
@@ -46,16 +50,22 @@ def average_angle_diversity(G,mid_nodes, origin):
         angles.append(angle)
     return sum(angles) / len(angles) if angles else 0
 
+def compute_route_area(path_positions):
+    if len(path_positions) < 3:
+        return 0.0
+    lons, lats = zip(*[(lon, lat) for lat, lon in path_positions])#緯度，経度の順に入れ替えてアンジップ
+    area, _ = geod.polygon_area_perimeter(lons, lats)
+    return abs(area)
+
 def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
     custom_weight = custom_weight_builder(node_score, lambda_score)
     best_path = None
     best_diff = float('inf')
     nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 25)
     route_suggestions = []
-    for _ in range(500): # 500回試行
+    mini_area_threshold = 20000 * target_distance_km**2  # 最小面積の閾値（平方メートル）
+    for _ in range(100): # 100回試行
         mid_nodes = [node for node in random.sample(nodes, N)]
-        angle = average_angle_diversity(G, mid_nodes, (G.nodes[orig_node]['y'], G.nodes[orig_node]['x']))
-        angle_penalty = max(0, 60 - angle) 
         try:
             route_nodes = [orig_node] + mid_nodes + [orig_node]
             path = []
@@ -67,15 +77,20 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
             total_length = sum([G.get_edge_data(u, v)[0]['length'] for u, v in zip(path[:-1], path[1:])])
             total_km = total_length / 1000.0
 
+            angle = average_angle_diversity(G, mid_nodes, (G.nodes[orig_node]['y'], G.nodes[orig_node]['x']))
+            angle_penalty = max(0, 60 - angle) * 0.5
+
+            area = compute_route_area(path_positions)
+            area_penalty = max(0, mini_area_threshold-area) *0.5 / 1000
+
             diff = abs(total_km - target_distance_km)
-            score = diff + 0.5 * angle_penalty
+
+            score = diff + angle_penalty + area_penalty
+            print(f"Score: {score:.2f}, Diff: {diff:.2f}, Angle_penalty: {angle_penalty:.2f}, Area_penalty: {area_penalty:.2f}")
             result = {
-                'path': path,
                 'path_positions': path_positions,
                 'total_km': round(total_km, 3),
-                'diff': round(diff, 3),
                 'mid_nodes': mid_nodes,
-                'angle': round(angle, 3),
                 'score': round(score, 3)
             }
             route_suggestions.append(result)
