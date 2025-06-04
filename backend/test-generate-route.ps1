@@ -7,7 +7,7 @@ $body = @{
 } | ConvertTo-Json -Depth 3
 
 $response = Invoke-RestMethod -Method Post `
-    -Uri http://localhost:5000/generate-route `
+    -Uri http://localhost:8000/generate-route `
     -Body $body `
     -ContentType "application/json"
 
