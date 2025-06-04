@@ -54,7 +54,7 @@ const Home: React.FC = () => {
             body: JSON.stringify({
                 lat: lat,
                 lon: lon,
-                distance: steps,
+                distance: dist,
                 lambda_score: 0.1,
                 theme: selected,
             }),
