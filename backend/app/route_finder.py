@@ -24,7 +24,8 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
     best_path = None
     best_diff = float('inf')
     nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 25)
-    for _ in range(10):
+    route_suggestions = []
+    for _ in range(500): # 500回試行
         mid_nodes = [node for node in random.sample(nodes, N)]
 
         try:
@@ -38,11 +39,17 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
             total_km = total_length / 1000.0
 
             diff = abs(total_km - target_distance_km)
-            if diff < best_diff:
-                best_path = path
-                best_diff = diff
-                best_km = total_km
-                best_mid_nodes = mid_nodes            
+            if diff < target_distance_km * 0.1: # 10% の誤差を許容
+                path_positions = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in path]
+                result = {
+                    'path': path,
+                    'path_positions': path_positions,
+                    'total_km': round(total_km, 3),
+                    'diff': round(diff, 3),
+                    'mid_nodes': mid_nodes
+                }
+                route_suggestions.append(result)
+                route_suggestions.sort(key=lambda x: x['diff'])
         except:
             continue
-    return best_path, best_km, best_mid_nodes
+    return route_suggestions[:5] if len(route_suggestions) > 5 else route_suggestions
