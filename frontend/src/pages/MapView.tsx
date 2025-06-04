@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline} from 'react-leaflet';
+import { useLocation } from 'react-router-dom'; 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -12,7 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // 中心座標、今後は現在地に変更予定
-const centerPosition: [number, number] = [36.6434, 138.1881]
+// const centerPosition: [number, number] = [36.6434, 138.1881]
 
 const defaultIcon = L.icon({
   iconUrl: markerIcon,
@@ -25,6 +26,10 @@ const defaultIcon = L.icon({
 });
 
 const MapView: React.FC = () => {
+  const location = useLocation();
+  const routeData = location.state?.routeData;
+  const path = routeData?.path || [];
+  const centerPosition = path[0] // 現在地の座標を取得するために、最初のポイントを中心に設定
   return (
     <MapContainer
       center={centerPosition}
@@ -38,6 +43,9 @@ const MapView: React.FC = () => {
       <Marker position={centerPosition} icon={defaultIcon}>
         <Popup>現在地！</Popup>
       </Marker>
+      {path.length > 1 &&(
+        <Polyline positions={path} color="blue"/>
+      )}
     </MapContainer>
   );
 };
