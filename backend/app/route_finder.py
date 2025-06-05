@@ -5,17 +5,18 @@ from itertools import combinations
 import math
 from shapely.geometry import Polygon
 from pyproj import Geod
+from typing import Dict, Any, Callable, List, Tuple
 
 geod = Geod(ellps="WGS84")  
 
-def custom_weight_builder(node_score, lambda_score):
-    def custom_weight(u, v, data):
+def custom_weight_builder(node_score: Dict[int,int], lambda_score: float) -> Callable:
+    def custom_weight(u:int, v:int, data:Dict[str,Any]) -> float:
         base_cost = data.get('length', 1.0)
         bonus = node_score.get(v, 0) + node_score.get(u, 0)
-        return base_cost - lambda_score * bonus
+        return max(0.0, base_cost - lambda_score * bonus)
     return custom_weight
 
-def filter_far_nodes(G, orig_node, min_distance_m=400):
+def filter_far_nodes(G: nx.Graph, orig_node: int, min_distance_m: float=400) -> List[int]:
     ox, oy = G.nodes[orig_node]['x'], G.nodes[orig_node]['y']
     far_nodes = []
     for node in G.nodes:
@@ -25,7 +26,7 @@ def filter_far_nodes(G, orig_node, min_distance_m=400):
             far_nodes.append(node)
     return far_nodes
 
-def angle_between_nodes(node1, node2, origin):
+def angle_between_nodes(node1: Tuple[float,float], node2: Tuple[float, float], origin: Tuple[float, float]) -> float:
     # node = (lat, lon)
     vec1 = (node1[0] - origin[0], node1[1] - origin[1])
     vec2 = (node2[0] - origin[0], node2[1] - origin[1])
@@ -41,7 +42,7 @@ def angle_between_nodes(node1, node2, origin):
     angle_rad = math.acos(cos_theta)
     return math.degrees(angle_rad)
 
-def average_angle_diversity(G,mid_nodes, origin):
+def average_angle_diversity(G: nx.Graph ,mid_nodes: List[int], origin: Tuple[float, float]) -> float:
     angles = []
     for n1, n2 in combinations(mid_nodes, 2):
         node1 = (G.nodes[n1]['y'], G.nodes[n1]['x'])
@@ -50,20 +51,25 @@ def average_angle_diversity(G,mid_nodes, origin):
         angles.append(angle)
     return sum(angles) / len(angles) if angles else 0
 
-def compute_route_area(path_positions):
+def compute_route_area(path_positions: List[Tuple[float,float]]) -> float:
     if len(path_positions) < 3:
         return 0.0
     lons, lats = zip(*[(lon, lat) for lat, lon in path_positions])#緯度，経度の順に入れ替えてアンジップ
     area, _ = geod.polygon_area_perimeter(lons, lats)
     return abs(area)
 
-def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
+def score_route(total_km: float, target_km: float, angle:float, angle_threshold: float, area:float, area_threshold:float) -> float:
+    diff = abs(total_km -target_km)
+    angle_penalty = max(0, angle_threshold - angle) * 0.5
+    area_penalty = max(0, area_threshold - area) * 0.5 / 1000
+    return diff + angle_penalty + area_penalty
+
+def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score: Dict[int,int], lambda_score: float, N: int=2) -> List[Dict[str,Any]]:
     custom_weight = custom_weight_builder(node_score, lambda_score)
-    best_path = None
-    best_diff = float('inf')
     nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 25)
     route_suggestions = []
-    mini_area_threshold = 20000 * target_distance_km**2  # 最小面積の閾値（平方メートル）
+    area_threshold = 20000 * target_distance_km**2  # 最小面積の閾値（平方メートル）
+    angle_threshold = 60
     for _ in range(100): # 100回試行
         mid_nodes = [node for node in random.sample(nodes, N)]
         try:
@@ -76,17 +82,10 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
 
             total_length = sum([G.get_edge_data(u, v)[0]['length'] for u, v in zip(path[:-1], path[1:])])
             total_km = total_length / 1000.0
-
             angle = average_angle_diversity(G, mid_nodes, (G.nodes[orig_node]['y'], G.nodes[orig_node]['x']))
-            angle_penalty = max(0, 60 - angle) * 0.5
-
             area = compute_route_area(path_positions)
-            area_penalty = max(0, mini_area_threshold-area) *0.5 / 1000
 
-            diff = abs(total_km - target_distance_km)
-
-            score = diff + angle_penalty + area_penalty
-            print(f"Score: {score:.2f}, Diff: {diff:.2f}, Angle_penalty: {angle_penalty:.2f}, Area_penalty: {area_penalty:.2f}")
+            score = score_route(total_km, target_distance_km, angle, angle_threshold, area, area_threshold)
             result = {
                 'path_positions': path_positions,
                 'total_km': round(total_km, 3),
@@ -95,6 +94,7 @@ def find_loop(G, orig_node, target_distance_km, node_score, lambda_score, N=2):
             }
             route_suggestions.append(result)
             route_suggestions.sort(key=lambda x: x['score']) # 小さいほどいい
-        except:
+        except Exception as e:
+            print(f"ルート生成に失敗：{e}")
             continue
     return route_suggestions[:5] if len(route_suggestions) > 5 else route_suggestions

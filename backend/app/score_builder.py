@@ -1,6 +1,8 @@
 import osmnx as ox
+import networkx as nx
+from typing import Tuple, Dict, List
 
-def build_node_score_map(G, center_point, tag_score_list, dist=2000):
+def build_node_score_map(G: nx.Graph, center_point: Tuple[float, float], tag_score_list: List[Dict], dist: float=2000) -> Dict[int, int]:
     node_score = {}
     if not tag_score_list:
         print("タグスコアリストが空です。")
