@@ -1,3 +1,5 @@
+# route_finder.py
+
 import networkx as nx
 import random
 from geopy.distance import geodesic
@@ -111,6 +113,6 @@ def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score
             route_suggestions.append(result)
             route_suggestions.sort(key=lambda x: x['score']) # 小さいほどいい
         except Exception as e:
-            print(f"ルート生成に失敗：{e}")
+            logging.error(f"ルートの生成に失敗しました{e}")
             continue
     return route_suggestions[:5] if len(route_suggestions) > 5 else route_suggestions
