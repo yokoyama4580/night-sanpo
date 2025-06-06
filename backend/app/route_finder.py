@@ -6,6 +6,7 @@ import math
 from shapely.geometry import Polygon
 from pyproj import Geod
 from typing import Dict, Any, Callable, List, Tuple
+import logging
 
 geod = Geod(ellps="WGS84")  
 
@@ -64,6 +65,20 @@ def score_route(total_km: float, target_km: float, angle:float, angle_threshold:
     area_penalty = max(0, area_threshold - area) * 0.5 / 1000
     return diff + angle_penalty + area_penalty
 
+def extract_geometry_path(G: nx.Graph, path: List[int]) -> List[Tuple[float,float]]:
+    coords=[]
+    for u, v in zip(path[:-1],path[1:]):
+        edge_data = G.get_edge_data(u,v)[0]
+        if 'geometry' in edge_data:
+            edge_coords = list(edge_data['geometry'].coords)
+        else:
+            edge_coords = [(G.nodes[u]['x'], G.nodes[u]['y']), (G.nodes[v]['x'],G.nodes[v]['y'])]
+        if not coords:
+            coords.extend(edge_coords)
+        else:
+            coords.extend(edge_coords[1:])
+    return[(y,x)for x,y in coords]
+
 def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score: Dict[int,int], lambda_score: float, N: int=2) -> List[Dict[str,Any]]:
     custom_weight = custom_weight_builder(node_score, lambda_score)
     nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 25)
@@ -78,7 +93,7 @@ def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score
             for u, v in zip(route_nodes[:-1], route_nodes[1:]):
                 segment = nx.astar_path(G, u, v, weight=custom_weight)
                 path += segment if not path else segment[1:]
-            path_positions = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in path]
+            path_positions = extract_geometry_path(G, path)
 
             total_length = sum([G.get_edge_data(u, v)[0]['length'] for u, v in zip(path[:-1], path[1:])])
             total_km = total_length / 1000.0
@@ -88,6 +103,7 @@ def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score
             score = score_route(total_km, target_distance_km, angle, angle_threshold, area, area_threshold)
             result = {
                 'path_positions': path_positions,
+                'path_nodeids': path,
                 'total_km': round(total_km, 3),
                 'mid_nodes': mid_nodes,
                 'score': round(score, 3)

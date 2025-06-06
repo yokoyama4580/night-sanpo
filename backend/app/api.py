@@ -2,7 +2,12 @@ from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from .route_service import generate_routes
 from typing import Tuple, List, Dict, Any, Union
-import networkx as nx
+import logging
+
+logging.basicConfig(
+    level = logging.INFO,
+    format = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -22,6 +27,7 @@ def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tup
         return jsonify({"error": "ルートが見つかりませんでした"}), 404
     
     best_route = suggested_routes[0]
+    print(best_route)
     return jsonify({
         "path": best_route['path_positions'],
         "num_paths": len(suggested_routes),
@@ -32,6 +38,7 @@ def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tup
 app.suggested_routes = []
 @app.route('/generate-route', methods=['POST'])
 def generate_route():
+    logging.info("ルート生成リクエストを受け取りました")
     data = request.json
     lat, lon, distance_km, lambda_score, theme = parse_request(data)
     app.suggested_routes = generate_routes(lat, lon, distance_km, lambda_score, theme)
