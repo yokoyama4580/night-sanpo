@@ -1,36 +1,42 @@
 #suggest_theme.py
 
 import google.generativeai as genai
-from .tag_map import psychological_tag_map
+from .tag_map import osm_tag_map
 from .settings import API_KEY
 import logging
 
 genai.configure(api_key=API_KEY)
-category_list=list(psychological_tag_map.keys())
 
 # 推論用プロンプトテンプレート
 PROMPT_TEMPLATE = """
-あなたは、散歩ルートを心理的に心地よいものに調整するためのアシスタントです。
+あなたは、ユーザーの文章から心理的なニーズ（感情的・身体的欲求）を読み取り、
+それに合致する環境心理のカテゴリ（最大3つ）を選ぶアシスタントです。
 
-以下は、環境心理学に基づく6つの空間カテゴリとその心理効果です：
+以下は、環境心理に基づく心理的ニーズのカテゴリです。
+ユーザーが「どんな状態で、何を求めているのか」に基づいて、最も当てはまるカテゴリを1〜3個選んでください。
 
-- nature_connection（自然との接触）: 木々や水辺といった自然要素はストレスを軽減し、精神的な回復を促します。
-- openness（開放性）: 広い視野を確保できる空間は安心感や解放感をもたらします。
-- safety_refuge（安全・安心）: 静かで安全な空間は緊張を和らげ、心理的な落ち着きを生みます。
-- attention_restoration（注意の回復）: 落ち着いた公園やベンチなどは、精神的疲労からの回復を助けます。
-- exploration_diversity（探索・多様性）: 少しの冒険心や発見を刺激する道は、気分をリフレッシュします。
-- legibility（わかりやすさ・親しみ）: 分かりやすく構造化された空間は安心感とルート理解のしやすさにつながります。
+### 心理ニーズ一覧：
 
-ユーザーの発話：「{user_input}」
+- calmness（落ち着き）: 騒がしい環境から離れ、静かに心を整えたい状態
+- recovery（回復）: 肉体的・精神的な疲れから癒されたい状態
+- safety（安心・安全）: 不安や緊張を避け、守られている感覚が欲しい状態
+- freedom（開放感）: 圧迫感や閉塞感から解放され、自由を感じたい状態
+- exploration（探索・刺激）: 退屈を避け、新鮮さや驚き、軽い冒険を求めている状態
+- familiarity（親しみ）: 知っている場所や迷いにくい場所で安心したい状態
+- nature_connection（自然とのつながり）: 緑や水、風など自然の要素と触れ合いたい気分
 
-この発話に基づいて、ユーザーの心理状態を読み解き，
-上記心理効果を参考にしてその人にとって効果があるカテゴリを1〜3個以下のカテゴリリストから厳密に選んでください．
+---
 
-##カテゴリリスト
-{categories}
+### 入力文（ユーザーの日記）：
+「{user_input}」
 
-##重要
-プロンプトの出力は選んだカテゴリ(List[str])のみにしてください．
+この文章から、ユーザーの状態や求めているものを読み取り、
+上記カテゴリの中から最も当てはまるものを1〜3個、Pythonのlist[str]形式で出力してください。
+
+### 出力形式(例)：
+["calmness", "recovery", "nature_connection"]
+
+※出力は list[str] 形式のみ、理由説明や追加の文章は不要です。
 """
 
 def extract_code_block(text: str) -> str:
@@ -40,7 +46,7 @@ def extract_code_block(text: str) -> str:
     return text.strip()
 
 def predict_categories(user_input: str) -> list:
-    prompt = PROMPT_TEMPLATE.format(categories=", ".join(category_list), user_input=user_input)
+    prompt = PROMPT_TEMPLATE.format(user_input=user_input)
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt)
     clean_output = extract_code_block(response.text)
@@ -50,7 +56,7 @@ def predict_categories(user_input: str) -> list:
         logging.error(f"出力のパースに失敗")
  
 def get_tag_score_list(categories: list) -> list:
-    return [entry for cat in categories for entry in psychological_tag_map.get(cat, [])]
+    return [entry for cat in categories for entry in osm_tag_map.get(cat, [])]
 
 
 if __name__=="__main__":
