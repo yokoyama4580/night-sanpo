@@ -1,20 +1,20 @@
 import type { RouteObject } from "react-router-dom";
 import Home from "../pages/Home";
 import MapView from "../pages/MapView";
-import LoadingScreen from "../components/Common/LoadingScreen";
+import NewDiary from "../pages/NewDiary";
 
 const routes: RouteObject[] = [
     {
         path: "/",
-        element: <Home />
-    },
-    {
-        path: "/loading",
-        element: <LoadingScreen />
+        element: <NewDiary />
     },
     {
         path: "/map",
         element: <MapView />
+    },
+    {
+        path: "/new",
+        element: <Home />
     }
 ];
 
