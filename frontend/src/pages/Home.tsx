@@ -92,9 +92,14 @@ const Home: React.FC = () => {
                 }),
             });
             if (!response.ok) throw new Error('Network error');
-            const numRoutes = await response.json();
+            const result = await response.json();
             navigate("/map", {
-                state: { numRoutes }
+                state: { 
+                    totalDatas: {
+                        num_paths: result.num_paths,
+                        distances: result.distances
+                    }
+                }
             });
         } finally {
             setIsLoading(false); // MapView遷移でほぼ無効だが、失敗時にHome復帰したときのため
