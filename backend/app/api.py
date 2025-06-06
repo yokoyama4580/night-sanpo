@@ -26,10 +26,11 @@ def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tup
     if not suggested_routes:
         return jsonify({"error": "ルートが見つかりませんでした"}), 404
     
-    best_route = suggested_routes[0]
-    print(best_route)
+    num_paths = len(suggested_routes)
+    distances = [result['total_km'] for result in suggested_routes]
     return jsonify({
-        "num_paths": len(suggested_routes),
+        "num_paths": num_paths,
+        "distances": distances
     })
 
 app.suggested_routes = []
@@ -49,8 +50,6 @@ def select_route(route_index):
         if 0 <= index < len(routes):
             return jsonify({
                 "path": routes[index]['path_positions'],
-                "mid_nodes": routes[index]['mid_nodes'],
-                "distance": routes[index]['total_km']
             })
         else:
             return jsonify({"error": "無効なルートインデックス"}), 400
