@@ -17,10 +17,8 @@ def parse_request(data: Dict[str, Any])-> Tuple[float, float, float, float, List
     lon = float(data.get('lon', 138.1887))
     distance_km = float(data.get('distance', 3.0))
     lambda_score = float(data.get('lambda_score', 0.0))
-    theme = data.get('theme', None)
-    if not theme:
-        theme = ['default']
-    return lat, lon, distance_km, lambda_score, theme
+    user_input = data.get("diary","普通の気分")
+    return lat, lon, distance_km, lambda_score,user_input
 
 def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tuple[Response, int]]:
     if not suggested_routes:
@@ -38,8 +36,8 @@ app.suggested_routes = []
 def generate_route():
     logging.info("ルート生成リクエストを受け取りました")
     data = request.json
-    lat, lon, distance_km, lambda_score, theme = parse_request(data)
-    app.suggested_routes = generate_routes(lat, lon, distance_km, lambda_score, theme)
+    lat, lon, distance_km, lambda_score, user_input = parse_request(data)
+    app.suggested_routes,_ = generate_routes(lat, lon, distance_km, lambda_score, user_input)
     return build_response(app.suggested_routes)
 
 @app.route('/select-route/<route_index>', methods=["GET"])

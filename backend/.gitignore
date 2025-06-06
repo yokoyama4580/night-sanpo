@@ -4,3 +4,4 @@ venv
 # キャッシュフォルダ
 cache/
 __pycache__/
+app/.env
