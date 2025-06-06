@@ -121,7 +121,7 @@ const Home: React.FC = () => {
                         value={dist}
                         onChange={e => setDist(e.target.value)}
                         className="rounded-xl border-2 border-green-200 px-4 py-2 text-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none transition"
-                        placeholder="例: 3"
+                        placeholder="例: 2.5"
                     />
                 </label>
                 <div className="flex flex-col gap-2">
