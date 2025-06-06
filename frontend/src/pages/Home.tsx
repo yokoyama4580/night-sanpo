@@ -76,7 +76,7 @@ const Home: React.FC = () => {
             setGeoError('現在地の取得が完了するまでお待ちください');
             return;
         }
-        setIsLoading(true);  // ←追加（API開始時）
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_BASE}/generate-route`, {
                 method: 'POST',
@@ -91,9 +91,10 @@ const Home: React.FC = () => {
                     theme: selected,
                 }),
             });
-            const data = await response.json();
+            if (!response.ok) throw new Error('Network error');
+            const numRoutes = await response.json();
             navigate("/map", {
-                state: { routeData: data }
+                state: { numRoutes }
             });
         } finally {
             setIsLoading(false); // MapView遷移でほぼ無効だが、失敗時にHome復帰したときのため
@@ -120,7 +121,7 @@ const Home: React.FC = () => {
                         value={dist}
                         onChange={e => setDist(e.target.value)}
                         className="rounded-xl border-2 border-green-200 px-4 py-2 text-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none transition"
-                        placeholder="例: 3"
+                        placeholder="例: 2.5"
                     />
                 </label>
                 <div className="flex flex-col gap-2">

@@ -29,10 +29,7 @@ def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tup
     best_route = suggested_routes[0]
     print(best_route)
     return jsonify({
-        "path": best_route['path_positions'],
         "num_paths": len(suggested_routes),
-        "mid_nodes": best_route['mid_nodes'],
-        "distance": best_route['total_km']
     })
 
 app.suggested_routes = []
