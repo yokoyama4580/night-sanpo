@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { useLocation } from 'react-router-dom';
 import L from 'leaflet';
@@ -22,15 +23,41 @@ const defaultIcon = L.icon({
     shadowSize: [41, 41],
 });
 
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 const MapView: React.FC = () => {
     const location = useLocation();
-    const routeData = location.state?.routeData;
-    const path = routeData?.path || [];
-    const centerPosition = path[0];
+    const numRoutes = location.state?.numRoutes?.num_paths ?? 0;
+
+    const centerPosition: [number, number] = [36.6486, 138.1948];
+
+    {/* ルート選択 */}
+    const handleSelectRoute = async (index: number) => {
+        try {
+            const res = await fetch(`${API_BASE}/select-route/${index}`);
+            if (!res.ok) throw new Error('Network error');
+            const routeData = await res.json();
+            console.log('取得したルート情報:', routeData);
+        } catch (err) {
+            console.error('エラー:', err);
+        }
+    };
 
     return (
         <div className="w-screen h-screen relative bg-gray-50">
-            {/* 必要ならタイトルや戻るボタンをここに追加 */}
+            {numRoutes > 0 && (
+                <div className="absolute top-4 left-4 z-[1000] space-x-2 bg-white p-2 rounded shadow">
+                    {Array.from({ length: numRoutes }, (_, i) => (
+                    <button
+                        key={i}
+                        onClick={() => handleSelectRoute(i)}
+                        className="px-3 py-1 border rounded bg-blue-100 hover:bg-blue-300"
+                    >
+                        ルート{i + 1}
+                    </button>
+                    ))}
+                </div>
+            )}
             <MapContainer
                 center={centerPosition}
                 zoom={16}
@@ -44,9 +71,6 @@ const MapView: React.FC = () => {
                 <Marker position={centerPosition} icon={defaultIcon}>
                     <Popup>現在地！</Popup>
                 </Marker>
-                {path.length > 1 && (
-                    <Polyline positions={path} color="blue" />
-                )}
             </MapContainer>
         </div>
     );

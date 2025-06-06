@@ -76,7 +76,7 @@ const Home: React.FC = () => {
             setGeoError('現在地の取得が完了するまでお待ちください');
             return;
         }
-        setIsLoading(true);  // ←追加（API開始時）
+        setIsLoading(true);
         try {
             const response = await fetch(`${API_BASE}/generate-route`, {
                 method: 'POST',
@@ -91,9 +91,10 @@ const Home: React.FC = () => {
                     theme: selected,
                 }),
             });
-            const data = await response.json();
+            if (!response.ok) throw new Error('Network error');
+            const numRoutes = await response.json();
             navigate("/map", {
-                state: { routeData: data }
+                state: { numRoutes }
             });
         } finally {
             setIsLoading(false); // MapView遷移でほぼ無効だが、失敗時にHome復帰したときのため
