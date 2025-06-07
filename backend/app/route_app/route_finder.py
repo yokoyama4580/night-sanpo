@@ -81,7 +81,7 @@ def extract_geometry_path(G: nx.Graph, path: List[int]) -> List[Tuple[float,floa
             coords.extend(edge_coords[1:])
     return[(y,x)for x,y in coords]
 
-def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score: Dict[int,int], lambda_score: float, N: int=2) -> List[Dict[str,Any]]:
+def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score: Dict[int,int], lambda_score: float, N: int=2, debug: bool=False) -> List[Dict[str,Any]]:
     custom_weight = custom_weight_builder(node_score, lambda_score)
     nodes = filter_far_nodes(G, orig_node, min_distance_m=target_distance_km * 25)
     route_suggestions = []
@@ -91,10 +91,13 @@ def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score
         mid_nodes = [node for node in random.sample(nodes, N)]
         try:
             route_nodes = [orig_node] + mid_nodes + [orig_node]
-            path = []
+            path,short_path = [],[]
             for u, v in zip(route_nodes[:-1], route_nodes[1:]):
                 segment = nx.astar_path(G, u, v, weight=custom_weight)
                 path += segment if not path else segment[1:]
+                if debug:
+                    short_seg = nx.astar_path(G, u, v, weight="length")
+                    short_path += short_seg if not short_path else short_seg[1:] 
             path_positions = extract_geometry_path(G, path)
 
             total_length = sum([G.get_edge_data(u, v)[0]['length'] for u, v in zip(path[:-1], path[1:])])
@@ -106,6 +109,7 @@ def find_loop(G: nx.Graph, orig_node: int, target_distance_km: float, node_score
             result = {
                 'path_positions': path_positions,
                 'path_nodeids': path,
+                'short_path_nodeids': short_path,
                 'total_km': round(total_km, 3),
                 'mid_nodes': mid_nodes,
                 'score': round(score, 3)
