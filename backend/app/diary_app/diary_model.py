@@ -7,3 +7,4 @@ class DiaryEntry(BaseModel):
     text: str
     created_at: datetime
     categories: list = []
+    description: str = ""

@@ -78,9 +78,8 @@ def predict_categories(user_input: str) -> list:
     print(response.text)
     clean_output = extract_code_block(response.text)
     try:
-        parsed = json.loads(clean_output)
-
-        return parsed["categories"],parsed["comment"]
+        parsed_json = json.loads(clean_output)
+        return parsed_json
     except:
         logging.error(f"出力のパースに失敗")
  

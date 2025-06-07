@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 import logging
 
 def select_categories(user_input: str)->list:
-    return predict_categories(user_input)
+    return predict_categories(user_input) 
 
 def generate_routes(lat: float, lon: float, distance_km: float, lambda_score: float, categories: list, debug=False)-> List[Dict[str, Any]]:
     graph_dist = distance_km * 0.5 * 1000  # 目的距離/2[m]四方のグラフを生成
