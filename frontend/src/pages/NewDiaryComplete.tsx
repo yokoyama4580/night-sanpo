@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type LocationState = {
@@ -12,6 +12,7 @@ type LocationState = {
 const NewDiaryComplete: React.FC = () => {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const [dist, setDist] = useState<number>(0);
 
     if (!state) {
         return (
@@ -21,7 +22,54 @@ const NewDiaryComplete: React.FC = () => {
         );
     }
 
-    const { text, description, categories } = state as LocationState;
+    const { id, text, description, categories } = state as LocationState;
+
+    const handleGenerateMap = async () => {
+        if (!navigator.geolocation) {
+            alert("位置情報が取得できません。");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_BASE}/generate-route`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        lat,
+                        lon,
+                        distance: dist,
+                        lambda_score: 0.3,
+                        id: id,
+                        categories: categories,
+                    })
+                });
+
+                if (!res.ok) throw new Error("ルート生成に失敗しました");
+                const result = await res.json();
+
+                navigate("/map", {
+                    state: {
+                        totalDatas : {
+                            num_paths: result.num_paths,
+                            distances: result.distances
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("ルート生成エラー:", err);
+                alert("マップの生成に失敗しました。");
+            }
+
+        }, (err) => {
+            console.error("位置情報エラー:", err);
+            alert("現在地の取得に失敗しました。");
+        });
+    };
 
     return (
         <div className="min-h-screen w-screen bg-emerald-50 p-6 flex items-center justify-center">
@@ -47,9 +95,24 @@ const NewDiaryComplete: React.FC = () => {
                     </ul>
                 </div>
 
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        散歩したい距離（km）
+                    </label>
+                    <input
+                        type="number"
+                        value={dist}
+                        onChange={(e) => setDist(parseFloat(e.target.value))}
+                        min={0.5}
+                        max={50}
+                        step={0.5}
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    />
+                </div>
+
                 <div className="pt-4 text-center">
                     <button
-                        onClick={() => {/* 今は何もしない */}}
+                        onClick={handleGenerateMap}
                         className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded-full font-semibold shadow transition"
                     >
                         マップを表示する

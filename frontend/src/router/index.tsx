@@ -24,12 +24,12 @@ const routes: RouteObject[] = [
         element: <EditDiary />,
     },
     {
-        path: "/map",
-        element: <MapView />
-    },
-    {
         path: "/new/completed",
         element: <NewDiaryComplete />
+    },
+    {
+        path: "/map",
+        element: <MapView />
     }
 ];
 

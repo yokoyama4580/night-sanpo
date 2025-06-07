@@ -47,7 +47,7 @@ const DiaryList: React.FC = () => {
     return (
         <div className="min-h-screen w-screen bg-emerald-50 flex flex-col">
             <header className="text-center text-lg font-semibold py-4 shadow bg-white text-teal-500">
-                よるさんぽ日記
+                ダイアルーと
             </header>
 
             <div className="text-sm text-gray-500 px-4 pt-4 pb-2">日記一覧</div>
