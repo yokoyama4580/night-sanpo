@@ -13,20 +13,21 @@ const NewDiary: React.FC = () => {
         e.preventDefault();
 
         const created_at = new Date(date).toISOString();
-        const id = crypto.randomUUID();
 
         try {
             const res = await fetch(`${API_BASE}/diary/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, text, created_at })
+                body: JSON.stringify({ text, created_at })
             });
 
-            if (!res.ok) {
-                navigate('/');
-            } else {
-                console.error('作成失敗');
-            }
+            if (!res.ok) throw new Error('サーバーからの応答がありません');
+            const result = await res.json();
+
+            // text も一緒に送る
+            navigate('/new/completed', {
+                state: result
+            });
         } catch (err) {
             console.error('送信エラー:', err);
         }
