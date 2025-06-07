@@ -22,6 +22,7 @@ def build_node_score_map(G: nx.Graph, center_point: Tuple[float, float], tag_sco
     unique_tags = merge_tags_for_overpass(tag_score_list)
     try:
         gdf = ox.features.features_from_point(center_point, tags=unique_tags, dist=dist)
+        gdf = gdf[gdf.geometry.type == "Point"]
     except Exception as e:
         logging.error(f"Overpass APIからの取得に失敗: {e}")
         return node_score
@@ -35,4 +36,4 @@ def build_node_score_map(G: nx.Graph, center_point: Tuple[float, float], tag_sco
             score = tag_score["score"]
             if all(row.get(k) == v for k, v in tags.items()):
                 node_score[node] = node_score.get(node, 0) + score
-    return node_score
+    return node_score,gdf,unique_tags

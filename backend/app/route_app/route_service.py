@@ -7,16 +7,18 @@ from .suggest_theme import predict_categories, get_tag_score_list
 from typing import Any, Dict, List
 import logging
 
-def generate_routes(lat: float, lon: float, distance_km: float, lambda_score: float, user_input: str)-> List[Dict[str, Any]]:
+def select_categories(user_input: str)->list:
+    return predict_categories(user_input)
+
+def generate_routes(lat: float, lon: float, distance_km: float, lambda_score: float, categories: list, debug=False)-> List[Dict[str, Any]]:
     graph_dist = distance_km * 0.5 * 1000  # 目的距離/2[m]四方のグラフを生成
     G = get_walk_graph(lat, lon, graph_dist)
     orig_node = get_origin_node(G, lat, lon)
-    categories = predict_categories(user_input)
     logging.info(f"選ばれたカテゴリ{categories}")
     tag_score_list = get_tag_score_list(categories)
     logging.info(f"これらのtagでルートを評価します　ー＞　{tag_score_list}")
-    node_score = build_node_score_map(G, (lat, lon), tag_score_list, dist=graph_dist)
+    node_score,gdf,tags = build_node_score_map(G, (lat, lon), tag_score_list, dist=graph_dist)
     logging.info(f"ルート生成開始．．．")
-    suggested_routes = find_loop(G, orig_node, distance_km, node_score, lambda_score)
+    suggested_routes = find_loop(G, orig_node, distance_km, node_score, lambda_score,debug=debug)
     logging.info(f"ルート生成完了！！！  生成されたルートの数：{len(suggested_routes)}")
-    return suggested_routes,G
+    return suggested_routes,(G,gdf,tags)
