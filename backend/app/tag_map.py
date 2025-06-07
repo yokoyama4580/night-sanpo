@@ -1,50 +1,58 @@
 osm_tag_map = {
-    "calmness": [
+    "ease": [
         {"tag": {"leisure": "park"}, "score": 10},
-        {"tag": {"natural": "wood"}, "score": 10},
         {"tag": {"highway": "path"}, "score": 6},
-        {"tag": {"natural": "stream"}, "score": 7},
+        {"tag": {"amenity": "place_of_worship"}, "score": 10},
+        {"tag": {"building": "shrine"}, "score": 10},
+        {"tag": {"building": "temple"}, "score": 7},
         {"tag": {"highway": "primary"}, "score": -8},
         {"tag": {"highway": "motorway"}, "score": -10},
     ],
-    "recovery": [
+    "mollify": [
+        {"tag": {"leisure": "park"}, "score": 10},
+        {"tag": {"highway": "path"}, "score": 6},
+        {"tag": {"natural": "wood"}, "score": 10},
+        {"tag": {"natural": "tree"}, "score": 8},
+        {"tag": {"natural": "water"}, "score": 9},
+        {"tag": {"waterway": "river"}, "score": 7},
+        {"tag": {"waterway": "stream"}, "score": 7},
+        {"tag": {"natural": "bare_rock"}, "score": -5},
+        {"tag": {"highway": "primary"}, "score": -8},
+        {"tag": {"highway": "motorway"}, "score": -10},
+    ],
+    "restore": [
         {"tag": {"natural": "water"}, "score": 10},
         {"tag": {"natural": "spring"}, "score": 9},
         {"tag": {"amenity": "bench"}, "score": 8},
         {"tag": {"leisure": "garden"}, "score": 8},
         {"tag": {"highway": "steps"}, "score": -6},
     ],
-    "safety": [
-        {"tag": {"lit": "yes"}, "score": 5},
-        {"tag": {"highway": "residential"}, "score": 6},
-        {"tag": {"barrier": "guard_rail"}, "score": 4},
-        {"tag": {"highway": "unclassified"}, "score": -6},
-        {"tag": {"natural": "cliff"}, "score": -10},
-    ],
-    "freedom": [
+    "liberate": [
         {"tag": {"tourism": "viewpoint"}, "score": 12},
         {"tag": {"natural": "peak"}, "score": 10},
         {"tag": {"leisure": "common"}, "score": 8},
         {"tag": {"barrier": "fence"}, "score": -6},
     ],
-    "exploration": [
+    "connect": [
+        {"tag": {"shop": "department_store"}, "score": 6},
+        {"tag": {"shop": "electronics"}, "score": 6},
+        {"tag": {"amenity": "school"}, "score": 8},
+        {"tag": {"amenity": "university"}, "score": 8},
+        {"tag": {"building": "train_station"}, "score": 10},
+        {"tag": {"highway": "primary"}, "score": 4},
+        {"tag": {"barrier": "fence"}, "score": -6},
+    ],
+    "discover": [
         {"tag": {"tourism": "attraction"}, "score": 8},
         {"tag": {"historic": "ruins"}, "score": 9},
         {"tag": {"artwork_type": "statue"}, "score": 6},
         {"tag": {"highway": "path"}, "score": 5},
         {"tag": {"barrier": "wall"}, "score": -5},
     ],
-    "familiarity": [
+    "belong": [
         {"tag": {"place": "neighbourhood"}, "score": 6},
         {"tag": {"tourism": "information"}, "score": 5},
         {"tag": {"route": "foot"}, "score": 5},
         {"tag": {"highway": "motorway"}, "score": -10},
-    ],
-    "nature_connection": [
-        {"tag": {"natural": "wood"}, "score": 10},
-        {"tag": {"natural": "tree"}, "score": 8},
-        {"tag": {"leisure": "park"}, "score": 10},
-        {"tag": {"natural": "water"}, "score": 9},
-        {"tag": {"natural": "bare_rock"}, "score": -5},
     ]
 }
