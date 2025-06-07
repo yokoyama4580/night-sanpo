@@ -74,22 +74,27 @@ def get_entry(entry_id):
 @app.route("/diary", methods=["POST"])
 def create_entry():
     data = request.json
+    print(data)
     try:
         # カテゴリ推論
         user_text = data["text"]
-        categories, ai_comment = select_categories(user_text) or []
-
+        result = select_categories(user_text)
+        categories = result.get("categories", []) if result else []
+        ai_comment = result.get("comment", "") if result else ""
+        logging.info(f"カテゴリ：{categories}, コメント: {ai_comment}")
         # Entry作成
         entry = DiaryEntry(
             id=data["id"],
             text=user_text,
             created_at=datetime.now(),
-            categories=categories,  # ←追加
+            categories=categories, 
             description = ai_comment
         )
         service.add_entry(entry)
         return jsonify(entry.model_dump()), 201
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 400
 
 @app.route("/diary/<entry_id>", methods=["PUT"])

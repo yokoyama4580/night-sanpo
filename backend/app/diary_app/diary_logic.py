@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 from typing import List, Optional
-from datetime import datetime
 from .diary_model import DiaryEntry
 
 class DiaryService:
