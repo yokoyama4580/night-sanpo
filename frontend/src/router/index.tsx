@@ -4,6 +4,7 @@ import NewDiary from "../pages/NewDiary";
 import DiaryList from "../pages/DiaryList";
 import DiaryDetail from "../pages/DiaryDetail";
 import EditDiary from "../pages/EditDiary";
+import NewDiaryComplete from "../pages/NewDiaryComplete";
 
 const routes: RouteObject[] = [
     {
@@ -25,6 +26,10 @@ const routes: RouteObject[] = [
     {
         path: "/map",
         element: <MapView />
+    },
+    {
+        path: "/new/completed",
+        element: <NewDiaryComplete />
     }
 ];
 

@@ -5,4 +5,7 @@ venv
 cache/
 __pycache__/
 .env
+
+# データベースファイル
 diary_data.json
+*.db

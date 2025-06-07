@@ -1,4 +1,3 @@
-// pages/DiaryList.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DiaryCard from '../components/Diary/DiaryCard';
