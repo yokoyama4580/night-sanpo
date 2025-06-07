@@ -84,6 +84,7 @@ def predict_categories(user_input: str) -> list:
         logging.error(f"出力のパースに失敗")
  
 def get_tag_score_list(categories: list) -> list:
+    print(type(categories))
     return [entry for cat in categories for entry in osm_tag_map.get(cat, [])]
 
 

@@ -1,62 +1,34 @@
-# app/daiary_app/diary_logic.py
-import json
-from pathlib import Path
-from typing import List, Optional
+from sqlalchemy.orm import Session
 from .diary_model import DiaryEntry
+import json
 
 class DiaryService:
-    def __init__(self, file_path: str = "diary_data.json"):
-        self.file_path = Path(file_path)
-        self.file_path.touch(exist_ok=True)
-        if self.file_path.stat().st_size == 0:
-            self._save_all([])
+    def __init__(self, db_session: Session):
+        self.db = db_session
 
-    def _load_all(self) -> List[DiaryEntry]:
-        with self.file_path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            return [DiaryEntry(**entry) for entry in data]
+    def get_all(self):
+        return [entry.to_dict() for entry in self.db.query(DiaryEntry).all()]
 
-    def _save_all(self, entries: List[DiaryEntry]):
-        with self.file_path.open("w", encoding="utf-8") as f:
-            json.dump(
-                [entry.model_dump() for entry in entries],
-                f,
-                indent=2,
-                ensure_ascii=False,
-                default=str
-            )
-
-    def get_all(self) -> List[DiaryEntry]:
-        return self._load_all()
-
+    def get_entry(self, entry_id: str):
+        entry = self.db.query(DiaryEntry).filter(DiaryEntry.id == entry_id).first()
+        return entry.to_dict() if entry else None
+    
     def add_entry(self, entry: DiaryEntry):
-        entries = self._load_all()
-        entries.append(entry)
-        self._save_all(entries)
+        self.db.add(entry)
+        self.db.commit()
 
-    def update_entry(self, entry_id: str, new_text: str) -> bool:
-        entries = self._load_all()
-        updated = False
-        for entry in entries:
-            if entry.id == entry_id:
-                entry.text = new_text
-                updated = True
-                break
-        if updated:
-            self._save_all(entries)
-        return updated
-
-    def delete_entry(self, entry_id: str) -> bool:
-        entries = self._load_all()
-        new_entries = [entry for entry in entries if entry.id != entry_id]
-        if len(new_entries) != len(entries):
-            self._save_all(new_entries)
+    def update_entry(self, entry_id: str, new_text: str):
+        entry = self.db.query(DiaryEntry).filter(DiaryEntry.id == entry_id).first()
+        if entry:
+            entry.text = new_text
+            self.db.commit()
             return True
         return False
-
-    def get_entry(self, entry_id: str) -> Optional[DiaryEntry]:
-        entries = self._load_all()
-        for entry in entries:
-            if entry.id == entry_id:
-                return entry
-        return None
+    
+    def delete_entry(self, entry_id: str):
+        entry = self.db.query(DiaryEntry).filter(DiaryEntry.id == entry_id).first()
+        if entry:
+            self.db.delete(entry)
+            self.db.commit()
+            return True
+        return False

@@ -8,11 +8,10 @@ BASE_URL = "http://127.0.0.1:8000"
 DIARY_URL = f"{BASE_URL}/diary"
 HEADERS = {"Content-Type": "application/json"}
 
-def create_diary(entry_id: str, text: str):
+def create_diary(text: str):
     payload = {
-        "id": entry_id,
         "text": text,
-        "created_at": datetime.now().isoformat()
+        "created_at": "2025-06-03-00:00:00"
     }
     r = requests.post(f"{BASE_URL}/diary", json=payload)
     try:
@@ -58,6 +57,7 @@ def get_entry(entry_id: str):
     r = requests.get(f"{DIARY_URL}/{entry_id}")
     print(f"Status: {r.status_code}")
     print("Response:", r.json())
+    return r.json()
 
 def update_entry(entry_id: str, new_text: str):
     payload = {"text": new_text}
@@ -75,20 +75,12 @@ def delete_entry(entry_id: str):
 if __name__ == "__main__":
     # ステップ①: 日記投稿 & カテゴリ推論
     text = "今日はとても疲れていて、静かな場所で癒されたい気分です。"
-    diary_entry = create_diary("test123", text)
+    diary_entry = create_diary(text)
 
-    # ステップ②: 推論されたカテゴリでルート生成
-    if diary_entry and "categories" in diary_entry:
-        categories = diary_entry["categories"]
-        print(f"カテゴリ（AI推論）: {categories}")
-        time.sleep(2)  # API間のインターバル（必要に応じて）
-        generate_route(categories)
-        time.sleep(1)
-        select_route(0)
-    else:
-        print("❌ カテゴリの取得に失敗したため、ルート生成をスキップ")
-    get_all_entries()
-    get_entry("test123")
-    update_entry("test123", "少し疲れが溜まっていたが、自然に癒された。")
-    delete_entry("test123")
-    get_all_entries()
+    # generate_route(diary.get("categories"))
+    # get_all_entries()
+    # entry = get_entry("test123")
+    # print(entry)
+    # update_entry("test123", "少し疲れが溜まっていたが、自然に癒された。")
+    # delete_entry("test123")
+    # get_all_entries()
