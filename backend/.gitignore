@@ -5,3 +5,4 @@ venv
 cache/
 __pycache__/
 .env
+diary_data.json

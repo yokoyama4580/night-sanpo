@@ -10,7 +10,6 @@ const AppRoutes = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <Header />
       <AppRoutes />
     </Router>
   )
