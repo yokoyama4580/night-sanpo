@@ -1,133 +1,82 @@
-// src/pages/NewDiary.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const NewDiary: React.FC = () => {
-    const [title, setTitle] = useState('');
-    const [date, setDate] = useState('');
-    const [body, setBody] = useState('');
-    const [dist, setDist] = useState('');
-    const [image, setImage] = useState<File | null>(null);
-    const [lat, setLat] = useState<number | null>(null);
-    const [lon, setLon] = useState<number | null>(null);
-    const navigate = useNavigate();
+const API_BASE = import.meta.env.VITE_API_BASE;
 
-    useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLat(position.coords.latitude);
-                setLon(position.coords.longitude);
-            },
-            (error) => {
-                console.error("位置情報の取得に失敗しました", error);
-            }
-        );
-    }, []);
+const NewDiary: React.FC = () => {
+    const [text, setText] = useState('');
+    const today = new Date().toISOString().split('T')[0];
+    const [date, setDate] = useState(today);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (lat === null || lon === null) {
-            alert("現在地の取得に失敗しています");
-            return;
-        }
-        console.log("aaasfagjdsflkajslfja");
-        console.log(lat, lon, dist, body)
+        const created_at = new Date(date).toISOString();
+        const id = crypto.randomUUID();
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE}/generate-route`, {
+            const res = await fetch(`${API_BASE}/diary/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    diary: body,
-                    distance: dist,
-                    lat: lat,
-                    lon: lon,
-                    lambda_score: 0.3
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, text, created_at })
             });
 
             if (!res.ok) {
-                throw new Error('送信に失敗しました');
+                navigate('/');
+            } else {
+                console.error('作成失敗');
             }
-            const result = await res.json();
-            console.log('送信成功:', result);
-            navigate("/map", {
-                state: { 
-                    totalDatas: {
-                        num_paths: result.num_paths,
-                        distances: result.distances
-                    }
-                }
-            });
-            // 必要に応じて画面遷移や通知
         } catch (err) {
-            console.error('エラー:', err);
+            console.error('送信エラー:', err);
         }
     };
 
     return (
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
-            <h1 className="text-2xl font-bold mb-4">新しい日記を書く</h1>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="min-h-screen w-screen bg-emerald-50 p-6 flex items-center justify-center relative">
+            <form
+                onSubmit={handleSubmit}
+                className="w-full max-w-xl bg-white rounded-3xl shadow-lg p-6 space-y-6"
+            >
+                <h2 className="text-3xl font-bold text-teal-500 text-center">📝 日記を作成</h2>
+
                 <div>
-                    <label className="block font-medium">タイトル</label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full border px-3 py-2 rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium">日付</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">日付</label>
                     <input
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full border px-3 py-2 rounded"
+                        max={today}
                         required
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
                     />
                 </div>
+
                 <div>
-                    <label className="block font-medium">本文</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">本文</label>
                     <textarea
-                        value={body}
-                        onChange={(e) => setBody(e.target.value)}
-                        className="w-full border px-3 py-2 rounded h-40 resize-none"
+                        placeholder="今日の出来事や思ったことなど..."
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 h-40 resize-none focus:outline-none focus:ring-2 focus:ring-gray-500"
                         required
                     />
                 </div>
-                <div>
-                    <label className="block font-medium">距離（km）</label>
-                    <input
-                        type="number"
-                        value={dist}
-                        onChange={(e) => setDist(e.target.value)}
-                        className="w-full border px-3 py-2 rounded"
-                        step="0.1"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium">画像（任意）</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setImage(e.target.files?.[0] || null)}
-                        className="w-full"
-                    />
-                </div>
+
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-2 rounded transition"
                 >
-                    保存
+                    保存する
                 </button>
             </form>
+
+            <button
+                onClick={() => navigate('/')}
+                className="absolute bottom-6 left-6 text-sm text-teal-600 hover:text-teal-400 transition"
+            >
+                ← 日記一覧に戻る
+            </button>
         </div>
     );
 };
