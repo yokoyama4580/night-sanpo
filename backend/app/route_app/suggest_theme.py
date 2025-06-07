@@ -1,9 +1,9 @@
 #suggest_theme.py
-
 import google.generativeai as genai
 from .tag_map import osm_tag_map
 from .settings import API_KEY
 import logging
+import json
 
 genai.configure(api_key=API_KEY)
 
@@ -53,11 +53,16 @@ PROMPT_TEMPLATE = """
 
 この文章から、ユーザーの状態や求めているものを読み取り、
 上記カテゴリの中から最も当てはまるものを1〜3個、Pythonのlist[str]形式で出力してください。
+なぜそのカテゴリを選んだのか，ユーザーにどのようになってほしいのかを文章で出力してください
 
-### 出力形式(例)：
-["calmness", "recovery", "nature_connection"]
-
-※出力は list[str] 形式のみ、理由説明や追加の文章は不要です。
+### 出力形式：
+```json
+{{
+  "categories": ["restore", "ease"],
+  "comment": "あなたは日々の疲れから、自然の中で静かに過ごして癒しを得たいと感じているようです。"
+}}
+```
+※出力は上記のJSON形式だけにしてください。解説や補足は不要です。
 """
 
 def extract_code_block(text: str) -> str:
@@ -70,9 +75,12 @@ def predict_categories(user_input: str) -> list:
     prompt = PROMPT_TEMPLATE.format(user_input=user_input)
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt)
+    print(response.text)
     clean_output = extract_code_block(response.text)
     try:
-        return eval(clean_output)
+        parsed = json.loads(clean_output)
+
+        return parsed["categories"],parsed["comment"]
     except:
         logging.error(f"出力のパースに失敗")
  
