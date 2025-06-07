@@ -47,7 +47,7 @@ const DiaryDetail: React.FC = () => {
                 </div>
 
                 {/* タイトル */}
-                <h2 className="text-2xl font-bold text-teal-600 mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
                     {diary.text.split('\n')[0]}
                 </h2>
 
