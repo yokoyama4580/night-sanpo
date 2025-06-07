@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, g
 from flask_cors import CORS
 from .route_app.route_service import generate_routes, select_categories
 from typing import Tuple, List, Dict, Any, Union
@@ -6,6 +6,9 @@ import logging
 from datetime import datetime
 from .diary_app.diary_logic import DiaryService
 from .diary_app.diary_model import DiaryEntry
+from db import SessionLocal,init_db
+from dateutil.parser import isoparse
+import json
 
 logging.basicConfig(
     level = logging.INFO,
@@ -14,6 +17,19 @@ logging.basicConfig(
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
+
+# データベースのセッション管理
+init_db()
+
+@app.before_request
+def create_session():
+    g.db = SessionLocal()
+
+@app.teardown_request
+def teardown_session(exception=None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 # ------------Route-app-API----------------------------------------------------------------------
 def parse_request(data: Dict[str, Any])-> Tuple[float, float, float, float, List[str]]:
@@ -59,46 +75,36 @@ def select_route(route_index):
         return jsonify({"error": "ルートインデックスは整数でなければなりません"}), 400
 
 # ----------dialy-app-API------------------------------------------------------------------------- 
-service = DiaryService()
 @app.route("/diary/", methods=["GET"])
 def list_entries():
-    return jsonify([entry.model_dump() for entry in service.get_all()])
+    service = DiaryService(g.db)
+    return jsonify(service.get_all())
 
 @app.route("/diary/<entry_id>", methods=["GET"])
 def get_entry(entry_id):
+    service = DiaryService(g.db)
     entry = service.get_entry(entry_id)
     if entry is None:
         return jsonify({"error": "Entry not found"}), 404
-    return jsonify(entry.model_dump())
+    return jsonify(entry)
 
-@app.route("/diary", methods=["POST"])
+@app.route("/diary/", methods=["POST"])
 def create_entry():
+    service = DiaryService(g.db)
     data = request.json
-    print(data)
-    try:
-        # カテゴリ推論
-        user_text = data["text"]
-        result = select_categories(user_text)
-        categories = result.get("categories", []) if result else []
-        ai_comment = result.get("comment", "") if result else ""
-        logging.info(f"カテゴリ：{categories}, コメント: {ai_comment}")
-        # Entry作成
-        entry = DiaryEntry(
-            id=data["id"],
-            text=user_text,
-            created_at=datetime.now(),
-            categories=categories, 
-            description = ai_comment
-        )
-        service.add_entry(entry)
-        return jsonify(entry.model_dump()), 201
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 400
+    result = select_categories(data["text"])
+    new_entry = DiaryEntry(
+        text=data["text"],
+        created_at = isoparse(data["created_at"]) if "created_at" in data else datetime.utcnow(),
+        categories=json.dumps(result.get("categories", [])), 
+        description=result.get("comment", "")
+    )
+    service.add_entry(new_entry)
+    return jsonify(new_entry.to_dict()), 201
 
 @app.route("/diary/<entry_id>", methods=["PUT"])
 def update_entry(entry_id):
+    service = DiaryService(g.db)
     data = request.json
     new_text = data.get("text")
     if not new_text:
@@ -110,6 +116,7 @@ def update_entry(entry_id):
 
 @app.route("/diary/<entry_id>", methods=["DELETE"])
 def delete_entry(entry_id):
+    service = DiaryService(g.db)
     success = service.delete_entry(entry_id)
     if not success:
         return jsonify({"error": "Entry not found"}), 404
