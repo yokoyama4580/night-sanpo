@@ -59,8 +59,13 @@ PROMPT_TEMPLATE = """
 ### 出力形式：
 ```json
 {{
+<<<<<<< Updated upstream
   "categories": ["mollify", "liberate"],
   "comment": "あなたは日々のストレスから、自然の中で静かに過ごして癒されたいと感じているのではないでしょうか。"
+=======
+  "categories": ["restore", "ease"],
+  "comment": "あなたは日々の疲れから、自然の中で静かに過ごして癒しを得たいと感じているようです。散歩のなかで自然を感じ，嫌なことも忘れましょう！！"
+>>>>>>> Stashed changes
 }}
 ```
 出力されるcomment文は以下の構成を参考にしてください：
