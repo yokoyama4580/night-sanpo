@@ -43,7 +43,7 @@ const NewDiaryComplete: React.FC = () => {
                         lon,
                         distance: dist,
                         lambda_score: 0.3,
-                        id: id,
+                        entry_id: id,
                         categories: categories,
                     })
                 });
@@ -55,7 +55,8 @@ const NewDiaryComplete: React.FC = () => {
                     state: {
                         totalDatas : {
                             num_paths: result.num_paths,
-                            distances: result.distances
+                            distances: result.distances,
+                            entry_id: result.entry_id
                         }
                     }
                 });

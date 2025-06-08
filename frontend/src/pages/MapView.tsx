@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -42,6 +42,9 @@ const MapView: React.FC = () => {
     const location = useLocation();
     const numRoutes = location.state?.totalDatas?.num_paths ?? 0;
     const distances: number[] = location.state?.totalDatas?.distances ?? [];
+    const entryId = location.state?.totalDatas?.entry_id ?? "";
+
+    const navigate = useNavigate();
 
     const defaultCenter: [number, number] = [36.6486, 138.1948];
     const [path, setPath] = useState<[number, number][]>([]);
@@ -82,6 +85,37 @@ const MapView: React.FC = () => {
             console.error('エラー:', err);
         }
     }, []);
+
+    const handleSaveRoute = async (index: number) => {
+        if (!entryId) {
+            alert('日記IDが取得できませんでした');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/diary/${entryId}/paths`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ index }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || '保存に失敗しました');
+            }
+
+            const result = await res.json();
+            console.log('保存成功:', result);
+
+            alert('ルートを保存しました！');
+            navigate('/');
+        } catch (err) {
+            console.error('保存エラー:', err);
+            alert('ルートの保存に失敗しました。');
+        }
+    };
 
     useEffect(() => {
         if (numRoutes > 0) {
@@ -141,7 +175,12 @@ const MapView: React.FC = () => {
                                 <p className="text-base text-gray-800 font-bold">
                                     {distances[i] != null ? `${distances[i].toFixed(1)} km` : '---'}
                                 </p>
-                                <p className="text-center text-green-600 font-semibold text-sm">タップして表示</p>
+                                <button
+                                    onClick={() => handleSaveRoute(i)}
+                                    className="w-full py-2 px-4 text-white font-semibold rounded-full bg-orange-400 hover:bg-orange-700 shadow-md hover:shadow-lg transition duration-200 ease-in-out"
+                                >
+                                    このルートを選択
+                                </button>
                             </div>
                         ))}
                     </div>

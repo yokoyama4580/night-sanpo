@@ -41,7 +41,7 @@ def parse_request(data: Dict[str, Any])-> Tuple[float, float, float, float, List
     entry_id = data.get("entry_id", "")
     return lat, lon, distance_km, lambda_score, categories, entry_id
 
-def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tuple[Response, int]]:
+def build_response(suggested_routes: List[Dict[str,Any]], entry_id) -> Union[Response, Tuple[Response, int]]:
     if not suggested_routes:
         return jsonify({"error": "ルートが見つかりませんでした"}), 404
     
@@ -49,7 +49,8 @@ def build_response(suggested_routes: List[Dict[str,Any]]) -> Union[Response, Tup
     distances = [result['total_km'] for result in suggested_routes]
     return jsonify({
         "num_paths": num_paths,
-        "distances": distances
+        "distances": distances,
+        "entry_id": entry_id
     })
 
 app.suggested_routes = []
@@ -58,8 +59,9 @@ def generate_route():
     logging.info("ルート生成リクエストを受け取りました")
     data = request.json
     lat, lon, distance_km, lambda_score , categories, entry_id= parse_request(data)
+    logging.info(entry_id)
     app.suggested_routes,_ = generate_routes(lat, lon, distance_km, lambda_score, categories)
-    return build_response(app.suggested_routes)
+    return build_response(app.suggested_routes, entry_id)
 
 @app.route('/select-route/<route_index>', methods=["GET"])
 def select_route(route_index):
