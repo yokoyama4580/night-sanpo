@@ -14,6 +14,9 @@ const NewDiaryComplete: React.FC = () => {
     const { state } = useLocation();
     const [dist, setDist] = useState<number>(3.0);
 
+    // 🔸 追加: ローディング状態
+    const [loading, setLoading] = useState(false);
+
     if (!state) {
         return (
             <div className="min-h-[calc(100vh-60px)] flex items-center justify-center p-6">
@@ -29,6 +32,8 @@ const NewDiaryComplete: React.FC = () => {
             alert("位置情報が取得できません。");
             return;
         }
+
+        setLoading(true); // 🔸 追加: ローディング開始
 
         navigator.geolocation.getCurrentPosition(async (pos) => {
             const lat = pos.coords.latitude;
@@ -60,17 +65,29 @@ const NewDiaryComplete: React.FC = () => {
                         }
                     }
                 });
-
             } catch (err) {
                 console.error("ルート生成エラー:", err);
                 alert("マップの生成に失敗しました。");
+                setLoading(false); // 🔸 失敗時もローディング終了
             }
-
         }, (err) => {
             console.error("位置情報エラー:", err);
             alert("現在地の取得に失敗しました。");
+            setLoading(false); // 🔸 エラー時もローディング終了
         });
     };
+
+    // 🔸 ローディング中の画面
+    if (loading) {
+        return (
+            <div className="min-h-[calc(100vh-60px)] flex items-center justify-center bg-emerald-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full border-4 border-orange-400 border-t-transparent h-12 w-12 mx-auto mb-4"></div>
+                    <p className="text-orange-500 font-semibold">ルートを生成中です…</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-[calc(100vh-60px)] flex items-center justify-center px-4 py-8">
@@ -105,9 +122,9 @@ const NewDiaryComplete: React.FC = () => {
                 <div className="pt-4 text-center">
                     <button
                         onClick={handleGenerateMap}
-                        className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded-full font-semibold shadow transition"
+                        className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg transition-all duration-300 transform hover:scale-105"
                     >
-                        散歩ルートを生成する
+                        🚶 散歩ルートを生成する
                     </button>
                 </div>
 

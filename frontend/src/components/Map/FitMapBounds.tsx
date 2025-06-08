@@ -14,7 +14,7 @@ const FitMapBounds: React.FC<Props> = ({ positions }) => {
             const bounds = L.latLngBounds(positions);
             map.fitBounds(bounds, {
                 paddingTopLeft: [50, 50],
-                paddingBottomRight: [50, 50], // ← 下だけ広めに
+                paddingBottomRight: [50, 150],
             });
         }
     }, [positions, map]);
