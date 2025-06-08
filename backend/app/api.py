@@ -163,7 +163,6 @@ def create_entry():
     data = request.json
     result = select_categories(data["text"])
     new_entry = DiaryEntry(
-        title=data["title"],
         text=data["text"],
         created_at = isoparse(data["created_at"]) if "created_at" in data else datetime.utcnow(),
         categories=json.dumps(result.get("categories", [])), 
@@ -176,13 +175,10 @@ def create_entry():
 def update_entry(entry_id):
     service = DiaryService(g.db)
     data = request.json
-    new_title = data.get("title")
     new_text = data.get("text")
-    if not new_title:
-        return jsonify({"error": "text is required"}), 400
     if not new_text:
         return jsonify({"error": "text is required"}), 400
-    success = service.update_entry(entry_id, new_title, new_text)
+    success = service.update_entry(entry_id, new_text)
     if not success:
         return jsonify({"error": "Entry not found"}), 404
     return jsonify({"message": "Entry updated"})

@@ -1,9 +1,8 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-import FitMapBounds from './FitMapBounds';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -29,7 +28,23 @@ type Props = {
     height?: string;
 };
 
-const RouteMap: React.FC<Props> = ({ path, height = '[500px]' }) => {
+const FitMapBounds: React.FC<{ positions: [number, number][] }> = ({ positions }) => {
+    const map = useMap();
+
+    React.useEffect(() => {
+        if (positions.length > 0) {
+            const bounds = L.latLngBounds(positions);
+            map.fitBounds(bounds, {
+                paddingTopLeft: [50, 50],
+                paddingBottomRight: [50, 150],
+            });
+        }
+    }, [positions, map]);
+
+    return null;
+};
+
+const RouteMap: React.FC<Props> = ({ path, height = 'h-[500px]' }) => {
     if (!path || path.length === 0) return null;
 
     return (
@@ -37,7 +52,7 @@ const RouteMap: React.FC<Props> = ({ path, height = '[500px]' }) => {
             center={path[0]}
             zoom={16}
             scrollWheelZoom={false}
-            className={`w-full h-${height}`}
+            className={`w-full ${height}`}
         >
             <TileLayer
                 attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
