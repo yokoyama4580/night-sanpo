@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 const NewDiary: React.FC = () => {
+    const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const today = new Date().toISOString().split('T')[0];
     const [date, setDate] = useState(today);
@@ -18,7 +19,7 @@ const NewDiary: React.FC = () => {
             const res = await fetch(`${API_BASE}/diary/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, created_at })
+                body: JSON.stringify({ title, text, created_at })
             });
 
             if (!res.ok) throw new Error('サーバーからの応答がありません');
@@ -50,6 +51,18 @@ const NewDiary: React.FC = () => {
                         max={today}
                         required
                         className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">タイトル</label>
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="日記のタイトルを入力"
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        required
                     />
                 </div>
 

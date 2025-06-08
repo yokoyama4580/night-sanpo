@@ -92,7 +92,7 @@ const DiaryDetail: React.FC = () => {
                     </div>
                 ) : (
                     <div className="mt-8 p-6 bg-yellow-50 text-yellow-700 rounded-md shadow-sm">
-                        この日記にはまだ散歩ルートが登録されていません。
+                        この日記には散歩ルートが登録されていません。
                     </div>
                 )}
 

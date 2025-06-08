@@ -11,7 +11,7 @@ const App: React.FC = () => {
     <Router>
       <div className="min-h-screen w-screen bg-emerald-50 flex flex-col">
         <header className="text-center text-lg font-semibold py-4 shadow bg-white text-teal-500">
-          ダイアルーと
+          ストレスはっさんぽ
         </header>
         <main className="flex-1 overflow-y-auto">
           <AppRoutes />
