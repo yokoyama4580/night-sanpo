@@ -34,7 +34,7 @@ const NewDiary: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen w-screen bg-emerald-50 p-6 flex items-center justify-center relative">
+        <div className="min-h-[calc(100vh-60px)] flex items-center justify-center px-4 py-8">
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-xl bg-white rounded-3xl shadow-lg p-6 space-y-6"

@@ -45,11 +45,7 @@ const DiaryList: React.FC = () => {
     }, {} as Record<string, Diary[]>);
 
     return (
-        <div className="min-h-screen w-screen bg-emerald-50 flex flex-col">
-            <header className="text-center text-lg font-semibold py-4 shadow bg-white text-teal-500">
-                ダイアルーと
-            </header>
-
+        <div className="min-h-[calc(100vh-60px)] flex flex-col">
             <div className="text-sm text-gray-500 px-4 pt-4 pb-2">日記一覧</div>
 
             <main className="flex-1 px-4 pb-20 space-y-6">
