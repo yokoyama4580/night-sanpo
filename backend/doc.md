@@ -24,7 +24,8 @@ http://localhost:8000/
 ```json
 {
   "num_paths": 3,
-  "distances": [2.9, 3.1, 3.0]
+  "distances": [2.9, 3.1, 3.0],
+  "entry_id": "faagf123"
 }
 ```
 - 📍 /select-route/<index> (GET)
