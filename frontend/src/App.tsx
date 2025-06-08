@@ -1,5 +1,4 @@
 import React from 'react';
-import Header from './components/Header';
 import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import routes from './router/index';
 
@@ -10,7 +9,14 @@ const AppRoutes = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppRoutes />
+      <div className="min-h-screen w-screen bg-emerald-50 flex flex-col">
+        <header className="text-center text-lg font-semibold py-4 shadow bg-white text-teal-500">
+          ダイアルーと
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          <AppRoutes />
+        </main>
+      </div>
     </Router>
   )
 }

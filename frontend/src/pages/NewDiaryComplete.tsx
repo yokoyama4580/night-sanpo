@@ -12,11 +12,11 @@ type LocationState = {
 const NewDiaryComplete: React.FC = () => {
     const navigate = useNavigate();
     const { state } = useLocation();
-    const [dist, setDist] = useState<number>(0);
+    const [dist, setDist] = useState<number>(3.0);
 
     if (!state) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-emerald-50 p-6">
+            <div className="min-h-[calc(100vh-60px)] flex items-center justify-center p-6">
                 <p className="text-red-500 text-lg">データが見つかりません。</p>
             </div>
         );
@@ -73,7 +73,7 @@ const NewDiaryComplete: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen w-screen bg-emerald-50 p-6 flex items-center justify-center">
+        <div className="min-h-[calc(100vh-60px)] flex items-center justify-center px-4 py-8">
             <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 space-y-6">
                 <h2 className="text-2xl font-bold text-teal-600 text-center">✅ 保存が完了しました</h2>
 
@@ -85,15 +85,6 @@ const NewDiaryComplete: React.FC = () => {
                 <div>
                     <h3 className="text-md font-semibold text-gray-600 mb-2">推定された心理状態</h3>
                     <p className="text-teal-700 font-medium">{description}</p>
-                </div>
-
-                <div>
-                    <h3 className="text-md font-semibold text-gray-600 mb-2">カテゴリ</h3>
-                    <ul className="list-disc list-inside text-gray-700">
-                        {categories.map((cat, idx) => (
-                            <li key={idx}>{cat}</li>
-                        ))}
-                    </ul>
                 </div>
 
                 <div>
@@ -116,7 +107,7 @@ const NewDiaryComplete: React.FC = () => {
                         onClick={handleGenerateMap}
                         className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded-full font-semibold shadow transition"
                     >
-                        マップを表示する
+                        散歩ルートを生成する
                     </button>
                 </div>
 

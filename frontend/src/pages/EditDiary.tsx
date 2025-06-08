@@ -45,7 +45,7 @@ const EditDiary: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen w-screen bg-emerald-50 flex items-center justify-center px-4 py-12">
+        <div className="min-h-[calc(100vh-60px)] flex items-center justify-center px-4 py-8">
             <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-md">
                 <h2 className="text-2xl font-bold text-teal-600 mb-1">日記の編集</h2>
                 <p className="text-sm text-gray-500 mb-6">内容を修正し、「更新する」を押してください。</p>
