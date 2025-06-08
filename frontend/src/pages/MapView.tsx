@@ -87,7 +87,7 @@ const MapView: React.FC = () => {
         <div className="w-screen h-[calc(100vh-60px)] bg-gray-50 relative">
             {error && <ErrorBanner message={error} />}
 
-            <RouteMap path={path} height={"full"} />
+            <RouteMap path={path} height={"h-full"} />
 
             {numRoutes > 0 && (
                 <div className="absolute bottom-6 left-0 w-full z-[1000] overflow-x-auto px-10 py-2" ref={scrollRef}>
